@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM History 02 &mdash; Pre-Transformer NLP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a; --bg-card: #0d1117; --bg-code: #161b22;
+            --text-primary: #e6edf3; --text-secondary: #8b949e;
+            --accent: #A371F7; --accent-dim: #A371F744; --accent-glow: #A371F733;
+            --accent-2: #FF7B72; --accent-3: #F0A726; --accent-4: #3FB950;
+            --border: #21262d;
+            --font-display: 'Space Grotesk', sans-serif;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+            --font-body: 'Inter', sans-serif;
+            --max-width: 900px;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { background: var(--bg-primary); color: var(--text-primary); font-family: var(--font-body); font-size: 17px; line-height: 1.7; overflow-x: hidden; }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem 1.5rem; text-align: center; position: relative; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 700px; height: 600px; background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%); pointer-events: none; z-index: 0; }
+        .hero > * { position: relative; z-index: 1; }
+        .series-label { font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1rem; }
+        .hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; color: var(--text-primary); line-height: 1.2; margin-bottom: 1rem; }
+        .hero h1 .accent { color: var(--accent); }
+        .hero .subtitle { font-size: 1.1rem; color: var(--text-secondary); max-width: 640px; margin-bottom: 2rem; }
+        .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin-bottom: 2.5rem; }
+        .tag { font-family: var(--font-mono); font-size: 0.75rem; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid var(--accent); color: var(--accent); background: var(--accent-dim); white-space: nowrap; }
+        .tag.r { border-color: var(--accent-2); color: var(--accent-2); background: rgba(255,123,114,0.10); }
+        .tag.y { border-color: var(--accent-3); color: var(--accent-3); background: rgba(240,167,38,0.10); }
+        .tag.g { border-color: var(--accent-4); color: var(--accent-4); background: rgba(63,185,80,0.10); }
+        .pipeline { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.25rem; margin-bottom: 1rem; max-width: var(--max-width); }
+        .pipeline-step { font-family: var(--font-mono); font-size: 0.7rem; padding: 0.3rem 0.7rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; color: var(--text-secondary); white-space: nowrap; }
+        .pipeline-arrow { color: var(--accent); font-size: 0.9rem; font-weight: 700; }
+        .slide { min-height: 100vh; max-width: var(--max-width); margin: 0 auto; padding: 4rem 1.5rem; position: relative; display: flex; flex-direction: column; justify-content: center; }
+        .slide-number { font-family: var(--font-display); font-size: 5rem; font-weight: 700; color: var(--accent-dim); position: absolute; top: 2rem; right: 1.5rem; line-height: 1; user-select: none; }
+        .slide h2 { font-family: var(--font-display); font-size: 1.9rem; font-weight: 700; color: var(--accent); margin-bottom: 1.5rem; line-height: 1.25; }
+        .slide h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text-primary); margin-top: 1.5rem; margin-bottom: 0.75rem; }
+        .slide p { margin-bottom: 1rem; color: var(--text-secondary); }
+        .slide p strong { color: var(--text-primary); }
+        .slide ul, .slide ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--text-secondary); }
+        .slide li { margin-bottom: 0.4rem; }
+        .slide li strong { color: var(--text-primary); }
+        .slide code { font-family: var(--font-mono); font-size: 0.88em; background: var(--bg-code); padding: 0.1rem 0.35rem; border-radius: 3px; color: var(--accent); }
+        .table-wrap { overflow-x: auto; margin: 1.25rem 0; border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: var(--bg-code); color: var(--accent); font-weight: 600; text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); font-family: var(--font-display); white-space: nowrap; }
+        td { padding: 0.6rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) td { background: rgba(13, 17, 23, 0.5); }
+        .diagram-grid { display: grid; gap: 0.75rem; margin: 1.5rem 0; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; }
+        .diagram-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+        .diagram-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+        .diagram-panel { padding: 1rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; }
+        .diagram-panel.accent-border { border-left: 3px solid var(--accent); }
+        .diagram-panel.r { border-left: 3px solid var(--accent-2); }
+        .diagram-panel.y { border-left: 3px solid var(--accent-3); }
+        .diagram-panel.g { border-left: 3px solid var(--accent-4); }
+        .diagram-panel h4 { font-family: var(--font-display); font-size: 1rem; color: var(--accent); margin-bottom: 0.5rem; }
+        .diagram-panel.r h4 { color: var(--accent-2); }
+        .diagram-panel.y h4 { color: var(--accent-3); }
+        .diagram-panel.g h4 { color: var(--accent-4); }
+        .diagram-panel p, .diagram-panel ul { font-size: 0.9rem; }
+        .callout { background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0; }
+        .callout p { margin-bottom: 0; }
+        .callout .callout-label { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+        .callout.r { border-left-color: var(--accent-2); } .callout.r .callout-label { color: var(--accent-2); }
+        .callout.y { border-left-color: var(--accent-3); } .callout.y .callout-label { color: var(--accent-3); }
+        .callout.g { border-left-color: var(--accent-4); } .callout.g .callout-label { color: var(--accent-4); }
+        .quote { font-family: var(--font-display); font-size: 1.15rem; font-style: italic; color: var(--text-primary); padding: 1rem 1.5rem; border-left: 3px solid var(--accent); background: var(--bg-card); margin: 1.25rem 0; border-radius: 0 8px 8px 0; }
+        .quote .attr { display: block; margin-top: 0.5rem; font-style: normal; font-size: 0.85rem; color: var(--text-secondary); font-family: var(--font-mono); }
+        .timeline { display: flex; flex-direction: column; gap: 0.5rem; padding: 1rem 0; }
+        .tl-row { display: flex; gap: 1rem; align-items: flex-start; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+        .tl-year { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); min-width: 90px; padding-top: 0.1rem; }
+        .tl-event { flex: 1; }
+        .tl-event strong { color: var(--text-primary); }
+        .tl-event p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; }
+        .contents-list { list-style: none; padding-left: 0; counter-reset: contents; }
+        .contents-list li { counter-increment: contents; padding: 0.6rem 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; }
+        .contents-list li:last-child { border-bottom: none; }
+        .contents-list li::before { content: counter(contents, decimal-leading-zero); font-family: var(--font-mono); font-size: 0.85rem; color: var(--accent); min-width: 2rem; }
+        .contents-list a { color: var(--text-primary); text-decoration: none; }
+        .contents-list a:hover { color: var(--accent); }
+        .footer { text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary); font-size: 0.85rem; border-top: 1px solid var(--border); max-width: var(--max-width); margin: 0 auto; }
+        .footer a { color: var(--accent); text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+        .person-card { display: grid; grid-template-columns: 90px 1fr; gap: 1rem; padding: 1rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.6rem; }
+        .person-photo { width: 90px; height: 90px; border-radius: 50%; background: var(--accent-dim); border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 1.6rem; color: var(--accent); }
+        .person-card h4 { font-family: var(--font-display); margin-bottom: 0.2rem; color: var(--text-primary); }
+        .person-card .role { font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.4rem; }
+        .person-card p { font-size: 0.88rem; margin: 0; }
+        .formula { font-family: var(--font-mono); font-size: 1rem; padding: 1rem 1.25rem; background: var(--bg-code); border: 1px solid var(--border); border-radius: 6px; margin: 1rem 0; color: var(--text-primary); text-align: center; overflow-x: auto; }
+        @media (max-width: 640px) {
+            .slide { padding: 3rem 1rem; min-height: auto; }
+            .slide-number { font-size: 3rem; top: 1.5rem; right: 1rem; }
+            .slide h2 { font-size: 1.5rem; }
+            .diagram-grid.cols-2, .diagram-grid.cols-3 { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.8rem; }
+            table { font-size: 0.78rem; }
+            .person-card { grid-template-columns: 60px 1fr; }
+            .person-photo { width: 60px; height: 60px; font-size: 1.1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="hero">
+    <div class="series-label">LLM History Series &mdash; Presentation 02</div>
+    <h1>Pre-Transformer NLP &mdash; <span class="accent">Shannon to Bahdanau</span> (1948&ndash;2016)</h1>
+    <p class="subtitle">The 70-year run-up to the transformer paper. Information theory, the long Chomsky-vs-IBM argument, neural language models, word embeddings, sequence-to-sequence learning, and the 2014 attention paper that contained the seed of everything to come.</p>
+
+    <div class="tags">
+        <span class="tag r">Shannon</span><span class="tag r">Jelinek</span><span class="tag r">IBM Models</span>
+        <span class="tag y">Bengio</span><span class="tag y">Mikolov</span>
+        <span class="tag">Sutskever</span><span class="tag">Cho</span><span class="tag">Bahdanau</span>
+    </div>
+
+    <div class="pipeline">
+        <span class="pipeline-step">n-grams</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">IBM stat MT</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">NPLM (2003)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">word2vec (2013)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">seq2seq (2014)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">attention (2014)</span>
+        <span class="pipeline-arrow">&rarr;</span>
+        <span class="pipeline-step">transformer (2017)</span>
+    </div>
+</header>
+
+<section class="slide" id="slide-00">
+    <div class="slide-number">00</div>
+    <h2>What This Deck Covers</h2>
+    <p>Everything that happened to language modelling between Shannon's information theory and the 2017 transformer paper. Each idea here ends up reused inside the transformer or its descendants. The deck pays equal attention to the technical content and the people who produced it.</p>
+    <ul class="contents-list">
+        <li><a href="#slide-01">Shannon &mdash; Information Theory and Language</a></li>
+        <li><a href="#slide-02">The Symbolic Side &mdash; Chomsky's Programme</a></li>
+        <li><a href="#slide-03">The Statistical Counter &mdash; Jelinek and IBM</a></li>
+        <li><a href="#slide-04">IBM Models 1&ndash;5 and Statistical MT</a></li>
+        <li><a href="#slide-05">The Neural Sleeper &mdash; Hinton's Family Tree</a></li>
+        <li><a href="#slide-06">Bengio's NPLM (2003) &mdash; The Hinge</a></li>
+        <li><a href="#slide-07">Word Embeddings &mdash; word2vec and GloVe</a></li>
+        <li><a href="#slide-08">RNNs, LSTMs and Encoder-Decoder</a></li>
+        <li><a href="#slide-09">Bahdanau Attention &mdash; The Seed Crystal</a></li>
+        <li><a href="#slide-10">The People Behind These Ideas</a></li>
+        <li><a href="#slide-11">What Made the Transformer Inevitable</a></li>
+        <li><a href="#slide-12">Cheat Sheet</a></li>
+    </ul>
+</section>
+
+<section class="slide" id="slide-01">
+    <div class="slide-number">01</div>
+    <h2>Shannon &mdash; Information Theory and Language (1948)</h2>
+    <p>The story starts in 1948 at Bell Labs with <strong>Claude Shannon's <em>A Mathematical Theory of Communication</em></strong>. It is famously a paper about communication channels, but tucked inside it is what is plausibly the first <em>language model</em>: a chain of n-gram experiments using printed English.</p>
+
+    <p>Shannon counted letter pairs and triples in <em>"Jefferson the Virginian"</em> and similar sources, then sampled from those distributions to generate gibberish that nonetheless began to look like English the more context he conditioned on. He drew an unmistakable conclusion:</p>
+
+    <div class="quote">
+        It appears, then, that a sufficiently complex stochastic process will give a satisfactory representation of a discrete information source.
+        <span class="attr">&mdash; Claude Shannon, <em>A Mathematical Theory of Communication</em>, 1948 &sect; 4</span>
+    </div>
+
+    <p>That sentence is the founding charter of statistical NLP. Its second half &mdash; <em>a sufficiently complex stochastic process will give a satisfactory representation</em> &mdash; is, almost word for word, the bet that ChatGPT is built on.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>Things Shannon defined that we still use</h4>
+            <ul>
+                <li><strong>Entropy</strong> H(X) = &minus;&Sigma; p(x) log p(x). Loss in cross-entropy training is exactly this.</li>
+                <li><strong>Cross-entropy</strong> and <strong>perplexity</strong>. Perplexity = 2<sup>H</sup>. Still the headline LM metric.</li>
+                <li><strong>n-gram</strong> as a unit of approximation.</li>
+                <li><strong>Channel coding</strong> &mdash; relevant to the noisy-channel framing of MT and ASR.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Shannon the person</h4>
+            <p>Worked at Bell Labs alongside the transistor team. Built juggling machines, a chess-playing automaton, and rode a unicycle through the corridors. Quiet, mathematically rigorous, broadly disinterested in the academic-prestige game. The closest historical analogue to a modern Brain or DeepMind senior IC: small output, enormous influence.</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide" id="slide-02">
+    <div class="slide-number">02</div>
+    <h2>The Symbolic Side &mdash; Chomsky's Programme</h2>
+    <p>Nine years after Shannon, <strong>Noam Chomsky's <em>Syntactic Structures</em> (1957)</strong> proposed the opposite framing: language is not a probabilistic process, it is a system of formal rules. The book reviewed Skinner's behaviourism for <em>Language</em> and demolished it, in the process founding modern generative linguistics.</p>
+
+    <div class="quote">
+        Colorless green ideas sleep furiously.
+        <span class="attr">&mdash; Chomsky's most famous example. Grammatical, semantically nonsensical &mdash; intended as a refutation of statistical accounts.</span>
+    </div>
+
+    <p>Chomsky's argument was that statistical co-occurrence cannot distinguish that sentence from <em>furiously sleep ideas green colorless</em>, but any English speaker instantly can; therefore meaning and grammaticality must come from structure. It was a knockdown argument for sixty years and is now, in light of LLMs, treated more as an open question.</p>
+
+    <h3>The symbolic programme that followed</h3>
+    <ul>
+        <li><strong>Earley parser (1968)</strong>, <strong>Marcus parser (1980)</strong> &mdash; rule-based parsing.</li>
+        <li><strong>Penn Treebank (1989, Mitch Marcus, U. Penn)</strong> &mdash; annotated corpus that fuelled twenty years of supervised parsing research.</li>
+        <li><strong>HPSG, LFG, CCG</strong> &mdash; rich grammatical formalisms still studied in computational linguistics today.</li>
+        <li><strong>WordNet (Miller, Princeton, 1985)</strong> &mdash; a hand-built ontology of English. Used for forty years before being eclipsed by embeddings.</li>
+    </ul>
+
+    <div class="callout r">
+        <div class="callout-label">A note on Chomsky and LLMs</div>
+        <p>Chomsky himself, into his nineties, has remained a vocal sceptic of LLMs &mdash; arguing they are "high-tech plagiarism" and miss the point of language. His <em>New York Times</em> op-ed of 8 March 2023 makes the case explicitly. Many in the field disagree, but his framing of <em>what language is</em> remains the cleanest articulation of the symbolic side of the argument.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-03">
+    <div class="slide-number">03</div>
+    <h2>The Statistical Counter &mdash; Jelinek and IBM</h2>
+    <p>The counter-programme to Chomsky did not come from a university linguistics department. It came from <strong>IBM T. J. Watson Research</strong> in Yorktown Heights, where a Czech-born electrical engineer named <strong>Frederick Jelinek</strong> was leading a speech-recognition group.</p>
+
+    <div class="person-card">
+        <div class="person-photo">FJ</div>
+        <div>
+            <h4>Frederick Jelinek (1932&ndash;2010)</h4>
+            <div class="role">IBM Watson 1972&ndash;1993, Johns Hopkins CLSP 1993&ndash;2010</div>
+            <p>Survived the Holocaust as a child in Prague, emigrated to the US in 1949, did his PhD at MIT under Robert Fano and (effectively) Shannon. At IBM ran the speech-recognition group that produced the <em>noisy channel</em> framing of ASR and MT. Founded the JHU CLSP, which became the strongest US lab for statistical NLP.</p>
+        </div>
+    </div>
+
+    <h3>The IBM philosophy in one paragraph</h3>
+    <p>Linguistic theory does not constrain a recogniser; data does. Build a language model from a large corpus of text, build an acoustic model from a large corpus of recorded speech, combine them with Bayes' rule, decode with Viterbi, ship.</p>
+
+    <div class="formula">P(words | audio) &prop; P(audio | words) &middot; P(words)</div>
+
+    <p>P(words) is the language model. P(audio | words) is the acoustic model. The Jelinek group spent twenty years making each of those better, and almost every improvement turned out to come from <em>more data</em> or <em>better statistical estimation</em>, not from imported linguistic structure. Jelinek's famous remark:</p>
+
+    <div class="quote">
+        Every time I fire a linguist the performance of the speech recognizer goes up.
+        <span class="attr">&mdash; Frederick Jelinek, ~1985 (frequently softened in retellings; he later said he meant the structure linguists wanted to impose was wrong, not that linguists should not be hired)</span>
+    </div>
+</section>
+
+<section class="slide" id="slide-04">
+    <div class="slide-number">04</div>
+    <h2>IBM Models 1&ndash;5 and Statistical MT (1990&ndash;1993)</h2>
+    <p>Jelinek's group attacked machine translation with the same noisy-channel framing. The results &mdash; <strong>IBM Models 1&ndash;5</strong>, published by <em>Peter Brown, Vincent Della Pietra, Stephen Della Pietra and Bob Mercer</em> in 1993 &mdash; are the foundation of all subsequent statistical and neural MT.</p>
+
+    <div class="formula">P(English | French) &prop; P(French | English) &middot; P(English)</div>
+
+    <h3>The five models, ladder of complexity</h3>
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Model</th><th>Adds</th><th>Why it matters today</th></tr></thead>
+        <tbody>
+            <tr><td>Model 1</td><td>Lexical translation, uniform alignment</td><td>The seed of cross-lingual correspondence; ignores word order entirely.</td></tr>
+            <tr><td>Model 2</td><td>Position-dependent alignment</td><td>First explicit position bias &mdash; an ancestor of positional embeddings.</td></tr>
+            <tr><td>Model 3</td><td>Fertility (one word &rarr; many)</td><td>Counts how many target words a source word generates. Multi-token alignment.</td></tr>
+            <tr><td>Model 4</td><td>Distortion model</td><td>Word reordering as a learned distribution over offsets.</td></tr>
+            <tr><td>Model 5</td><td>Avoids overlap deficiencies</td><td>Cleaner generative story for alignment; rarely used in practice.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <p>The key reusable concept is the <strong>latent alignment</strong>. Words on each side line up to words on the other; that lining-up is hidden, learned by EM, and is reusable in any sequence-to-sequence problem. <em>Soft attention</em> in 2014 is a relaxation of exactly this idea.</p>
+
+    <div class="callout y">
+        <div class="callout-label">Where the IBM people went</div>
+        <p>Brown and Mercer left IBM Research and went to <strong>Renaissance Technologies</strong> &mdash; Jim Simons's hedge fund &mdash; where they reused the same statistical machinery to predict markets. Mercer became famous (and controversial) as a Republican mega-donor in the Trump era. The Della Pietra brothers also went to Renaissance. Statistical NLP literally walked out of academia into finance for fifteen years.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-05">
+    <div class="slide-number">05</div>
+    <h2>The Neural Sleeper &mdash; Hinton's Family Tree</h2>
+    <p>While IBM was running statistical NLP, a quieter and much smaller programme in <strong>distributed representations</strong> was running through Hinton's group in Toronto and a handful of fellow travellers (Schmidhuber in Munich, LeCun at Bell Labs, Bengio in Montreal).</p>
+
+    <p>It was unfashionable. It was <em>so</em> unfashionable that the field ran an unofficial blacklist on neural-net papers at NeurIPS for much of the 1990s and 2000s. Hinton, in interviews, has said that his strategy was simply to keep training PhD students until the field came around. It eventually did.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>The 1980s &amp; 90s prep work</h4>
+            <ul>
+                <li><strong>Backprop</strong> &mdash; Rumelhart, Hinton, Williams 1986.</li>
+                <li><strong>Boltzmann machines &amp; RBMs</strong> &mdash; Hinton with Sejnowski.</li>
+                <li><strong>LeNet</strong> &mdash; LeCun, 1989, at Bell Labs. CNNs for handwriting.</li>
+                <li><strong>LSTM</strong> &mdash; Hochreiter &amp; Schmidhuber, 1997.</li>
+                <li><strong>Distributed representations</strong> &mdash; Hinton, 1986, the philosophical case.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel g">
+            <h4>The students who matter</h4>
+            <ul>
+                <li><strong>Yoshua Bengio</strong> &mdash; Hinton's postdoc, then Mila.</li>
+                <li><strong>Ilya Sutskever</strong> &mdash; Hinton PhD, AlexNet co-author.</li>
+                <li><strong>Ruslan Salakhutdinov</strong> &mdash; Hinton PhD, CMU.</li>
+                <li><strong>Alex Krizhevsky</strong> &mdash; Hinton PhD, AlexNet first author.</li>
+                <li><strong>Alex Graves</strong> &mdash; LSTM, CTC, neural Turing machines.</li>
+                <li><strong>Volodymyr Mnih</strong> &mdash; DQN at DeepMind.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="quote">
+        I needed to keep students stupid enough to work on it.
+        <span class="attr">&mdash; Geoffrey Hinton, paraphrasing himself in multiple interviews on why neural-net research persisted through its unfashionable decades.</span>
+    </div>
+
+    <p>The Hinton-trained students are about as concentrated a contributor pool as the field has. Almost every senior IC at Brain, DeepMind, OpenAI, and Anthropic in 2026 either trained under Hinton, trained under one of his students, or works alongside someone who did.</p>
+</section>
+
+<section class="slide" id="slide-06">
+    <div class="slide-number">06</div>
+    <h2>Bengio's NPLM (2003) &mdash; The Hinge</h2>
+    <p>The hinge between the statistical era and the neural era is a single paper: <strong>Yoshua Bengio, R&eacute;jean Ducharme, Pascal Vincent and Christian Jauvin, <em>A Neural Probabilistic Language Model</em>, JMLR 2003</strong>.</p>
+
+    <p>It does two things at once:</p>
+    <ul>
+        <li>Replaces the n-gram lookup table with a feed-forward neural network that maps a context window to a probability distribution over the next word.</li>
+        <li>Crucially, makes the inputs to that network <em>continuous vector embeddings</em> of each word, learned end-to-end.</li>
+    </ul>
+
+    <div class="formula">P(w<sub>t</sub> | w<sub>t&minus;1</sub>, &hellip;, w<sub>t&minus;n+1</sub>) = softmax( W&middot;tanh(U&middot;[e(w<sub>t&minus;1</sub>); &hellip;; e(w<sub>t&minus;n+1</sub>)]) )</div>
+
+    <p>That second point matters more than the first. <strong>Word embeddings &mdash; learned, dense, real-valued representations of words &mdash; are introduced into NLP here.</strong> Every later development from word2vec to BERT to GPT-5 keeps this idea, in some form, at the input layer.</p>
+
+    <div class="callout">
+        <div class="callout-label">Why this paper is the hinge</div>
+        <p>The NPLM was reasonably competitive on perplexity in 2003 but <em>too slow to train</em> at the corpus sizes that mattered for speech and MT. So statistical n-gram models won, in production, for another decade. But the architecture &mdash; embeddings + neural net + softmax &mdash; became the blueprint everything else followed. The transformer is, at the input and output layers, recognisably a Bengio NPLM.</p>
+    </div>
+
+    <div class="person-card">
+        <div class="person-photo">YB</div>
+        <div>
+            <h4>Yoshua Bengio</h4>
+            <div class="role">Universit&eacute; de Montr&eacute;al, MILA founder</div>
+            <p>French-born, Canadian. Did his PhD at McGill, postdoc with Hinton in Toronto, then Bell Labs with LeCun, then settled in Montreal in 1993 and stayed. Built MILA into the largest deep-learning academic group in the world. His students &mdash; Goodfellow, Bahdanau, Cho (postdoc), Mensch &mdash; appear repeatedly in the rest of this deck and the rest of this series. Quietly intense, ferociously prolific. Now devotes most of his time to AI safety, and <a href="https://yoshuabengio.org">writes publicly about catastrophic risk</a>.</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide" id="slide-07">
+    <div class="slide-number">07</div>
+    <h2>Word Embeddings &mdash; word2vec and GloVe (2013&ndash;2014)</h2>
+    <p>For ten years after the NPLM, learned word embeddings were a research curiosity. Then in 2013 a small Google Brain team led by <strong>Tomas Mikolov</strong> released <strong>word2vec</strong> &mdash; a pair of dramatically simplified architectures (CBOW and skip-gram) that produced high-quality embeddings in a fraction of the compute.</p>
+
+    <h3>What made word2vec famous</h3>
+    <p>Not the architecture &mdash; the analogies. The vectors had compositional structure that nobody had quite expected:</p>
+
+    <div class="formula">v(king) &minus; v(man) + v(woman) &asymp; v(queen)</div>
+    <div class="formula">v(Paris) &minus; v(France) + v(Italy) &asymp; v(Rome)</div>
+
+    <p>The <em>Distributed Representations of Words and Phrases</em> paper (NIPS 2013) showed dozens of these. The result went viral. It made plain to a wider audience that semantics was, in some operational sense, geometric.</p>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>word2vec &mdash; Mikolov et al, Google</h4>
+            <ul>
+                <li><strong>CBOW</strong> predicts a word from its context.</li>
+                <li><strong>Skip-gram</strong> predicts context from a word.</li>
+                <li>Negative sampling and hierarchical softmax made it fast.</li>
+                <li>Training a 300 d embedding for 100 B-word corpora became a day's work.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>GloVe &mdash; Pennington, Socher, Manning, Stanford 2014</h4>
+            <ul>
+                <li>Factorise a global word-co-occurrence matrix.</li>
+                <li>Theoretically cleaner: explicit objective tied to PMI.</li>
+                <li>Open-sourced pre-trained vectors that became the default in NLP for years.</li>
+                <li>Manning's group at Stanford NLP becomes a major force from here.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="person-card">
+        <div class="person-photo">TM</div>
+        <div>
+            <h4>Tomas Mikolov</h4>
+            <div class="role">Brno University &rarr; Microsoft Research &rarr; Google Brain &rarr; Facebook AI &rarr; CIIRC</div>
+            <p>Czech, did his PhD on RNN-LMs in Brno in the late 2000s &mdash; pre-GPU, on small CPU clusters. Joined Google Brain in 2012 and shipped word2vec in 2013. Reportedly intense and quiet, with a strong scepticism of hype. Now back in Prague at the Czech Institute of Informatics, Robotics and Cybernetics. Word2vec was his first first-author paper out of Brno.</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide" id="slide-08">
+    <div class="slide-number">08</div>
+    <h2>RNNs, LSTMs and the Encoder-Decoder Era (2014&ndash;2016)</h2>
+    <p>While embeddings were spreading, the <em>sequence model</em> story was running in parallel. The key sequence of papers:</p>
+
+    <div class="table-wrap">
+    <table>
+        <thead><tr><th>Year</th><th>Paper</th><th>Authors</th><th>Contribution</th></tr></thead>
+        <tbody>
+            <tr><td>2010</td><td>RNN-LM</td><td>Mikolov et al, Brno</td><td>RNN trained as language model, beats large n-grams on speech rescoring.</td></tr>
+            <tr><td>2014</td><td>Sequence to Sequence Learning with Neural Networks</td><td>Sutskever, Vinyals, Le, Google</td><td>Encoder LSTM &rarr; decoder LSTM. End-to-end MT. Reverse the input for a 5 BLEU gain.</td></tr>
+            <tr><td>2014</td><td>Learning Phrase Representations using RNN Encoder-Decoder</td><td>Cho, van Merri&euml;nboer, Bahdanau, Bengio et al, Mila</td><td>Same idea, independently. <strong>Introduces the GRU.</strong></td></tr>
+            <tr><td>2014</td><td>Neural Machine Translation by Jointly Learning to Align and Translate</td><td>Bahdanau, Cho, Bengio, Mila</td><td><strong>Attention.</strong> See next slide.</td></tr>
+            <tr><td>2015</td><td>Effective Approaches to Attention-based NMT</td><td>Luong, Pham, Manning, Stanford</td><td>Local vs global attention; clarifications.</td></tr>
+            <tr><td>2016</td><td>Google's Neural Machine Translation System</td><td>Wu, Schuster, Chen, Le, &hellip; Google</td><td>Production-deployed NMT, displaces phrase-based MT inside Google Translate.</td></tr>
+        </tbody>
+    </table>
+    </div>
+
+    <h3>The two architectures and the sleeper LSTM</h3>
+    <p>RNN-LMs and LSTM-LMs are autoregressive sequence models with state. They can in principle handle arbitrary-length context, but in practice <em>vanishing gradients</em> meant they could not. <strong>LSTM (Hochreiter &amp; Schmidhuber, 1997)</strong> was the engineering fix &mdash; gating that let gradients flow over hundreds of timesteps.</p>
+
+    <p>LSTMs sat dormant for fifteen years (Schmidhuber's lab in Munich and one or two others used them) before becoming standard around 2013. <strong>The encoder-decoder pattern of 2014 is essentially: stack an LSTM as a reader, stack another as a writer, train end-to-end.</strong> Sutskever and Cho independently arrived at this within months.</p>
+
+    <div class="callout">
+        <div class="callout-label">The bottleneck problem</div>
+        <p>The Sutskever / Cho seq2seq compressed the entire source sentence into a fixed-length vector. For translations longer than ~30 words, performance fell off a cliff. This was the problem attention was invented to solve.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-09">
+    <div class="slide-number">09</div>
+    <h2>Bahdanau Attention &mdash; The Seed Crystal (2014)</h2>
+    <p>The single most important paper in this entire deck is arguably the one with the most modest title: <strong><em>Neural Machine Translation by Jointly Learning to Align and Translate</em>, Bahdanau, Cho and Bengio, ICLR 2015 (preprinted on arXiv 1 September 2014)</strong>.</p>
+
+    <p>The paper does one thing. Instead of compressing the source sentence into a single vector, it lets the decoder, at each output step, look back over the encoder's hidden states and <em>weigh</em> them by relevance. The weights are produced by a small feed-forward net &mdash; this is an <em>alignment model</em> in the IBM-Models sense, but soft and learned by gradient descent.</p>
+
+    <div class="formula">&alpha;<sub>ij</sub> = softmax(a(s<sub>i</sub>, h<sub>j</sub>))<br>c<sub>i</sub> = &Sigma;<sub>j</sub> &alpha;<sub>ij</sub> h<sub>j</sub></div>
+
+    <p>If you squint, the transformer's scaled-dot-product attention is the same equation with a different scoring function and applied also <em>within</em> a sequence (self-attention), not just across. The Vaswani paper of 2017 generalises this and removes the recurrent backbone, but the seed is here.</p>
+
+    <div class="person-card">
+        <div class="person-photo">DB</div>
+        <div>
+            <h4>Dzmitry Bahdanau</h4>
+            <div class="role">Mila PhD (Bengio) &rarr; Element AI / ServiceNow Research &rarr; Mila faculty</div>
+            <p>Belarusian; did his PhD with Bengio at Mila and was the first author on the attention paper as a young PhD student. The paper was nearly rejected by ICLR reviewers who found it incremental. Bahdanau has spoken openly in interviews about how much of the credit really belongs to Cho (who supervised him directly during the work) and Bengio (the senior author). A clean example of how a famously influential paper can come from a junior author plus their advisor.</p>
+        </div>
+    </div>
+
+    <div class="person-card">
+        <div class="person-photo">KC</div>
+        <div>
+            <h4>Kyunghyun Cho</h4>
+            <div class="role">Mila postdoc &rarr; NYU faculty &rarr; Genentech (research director, on leave from NYU)</div>
+            <p>Korean. Pioneered the GRU (a simpler LSTM), co-author on the attention paper, and one of the most prolific NLP researchers of the 2010s. Has the unusual property of being well-respected on both the empirical and theoretical sides of NLP. Currently splits time between drug discovery (Genentech) and academic work at NYU.</p>
+        </div>
+    </div>
+
+    <div class="callout y">
+        <div class="callout-label">Why attention was the seed crystal</div>
+        <p>By 2015 it was clear that adding attention to a seq2seq model dramatically improved translation, especially of long sentences. By 2016 every NMT system had attention. The natural follow-up question &mdash; <em>do we even need the recurrent backbone, or is the attention doing all the work?</em> &mdash; was sitting on the table for two years before the Vaswani team picked it up. Deck 03 covers what they did with it.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-10">
+    <div class="slide-number">10</div>
+    <h2>The People Behind These Ideas</h2>
+    <p>A short Who's Who of the figures who appear repeatedly across this deck and turn up later in the series. None of these are public figures in the way that Altman or Hassabis became; they are the deep-bench technical researchers who built the foundations.</p>
+
+    <div class="person-card">
+        <div class="person-photo">CS</div>
+        <div>
+            <h4>Claude Shannon (1916&ndash;2001)</h4>
+            <div class="role">Bell Labs, MIT</div>
+            <p>Information theorist. The closest thing computer science has to Newton. Built juggling robots and rode a unicycle. Almost everything in this deck rests on his entropy framing.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">FJ</div>
+        <div>
+            <h4>Frederick Jelinek (1932&ndash;2010)</h4>
+            <div class="role">IBM, JHU CLSP</div>
+            <p>The most influential statistical-NLP figure of the late 20th century. Trained dozens of statistical-NLP researchers at JHU's Center for Language and Speech Processing.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">GH</div>
+        <div>
+            <h4>Geoffrey Hinton</h4>
+            <div class="role">Toronto, Google Brain (2013&ndash;2023)</div>
+            <p>Backprop, distributed representations, the unbroken thread of neural-net research through the 1990s wilderness. Resigned Google in 2023 to speak about AI risk.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">YB</div>
+        <div>
+            <h4>Yoshua Bengio</h4>
+            <div class="role">Mila, Universit&eacute; de Montr&eacute;al</div>
+            <p>NPLM 2003, attention 2014. The most prolific advisor in deep learning. Now AI-safety focused.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">YL</div>
+        <div>
+            <h4>Yann LeCun</h4>
+            <div class="role">Bell Labs &rarr; NYU &rarr; Meta AI Chief Scientist</div>
+            <p>CNNs (1989), MNIST, the FAIR / Meta open-weight stance. Public sceptic of the LLM-as-AGI roadmap; advocates JEPA / world models. Loud, opinionated, scientifically generous.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">JS</div>
+        <div>
+            <h4>J&uuml;rgen Schmidhuber</h4>
+            <div class="role">IDSIA Lugano (Switzerland)</div>
+            <p>LSTM (1997, with Hochreiter), neural Turing machines, generative models. Famously argues that he and his students (Sepp Hochreiter, Felix Gers, Alex Graves) anticipated most of modern deep learning. The argument is partially correct and entirely characteristic.</p>
+        </div>
+    </div>
+    <div class="person-card">
+        <div class="person-photo">CDM</div>
+        <div>
+            <h4>Christopher Manning</h4>
+            <div class="role">Stanford NLP, Stanford HAI</div>
+            <p>Australian. Ran Stanford NLP through its modern dominant period. GloVe, dependency parsing, the Stanford CoreNLP toolkit, generations of students &mdash; Socher, Pennington, Karpathy, Liang. Calm, methodical, deeply influential.</p>
+        </div>
+    </div>
+</section>
+
+<section class="slide" id="slide-11">
+    <div class="slide-number">11</div>
+    <h2>What Made the Transformer Inevitable</h2>
+    <p>By the start of 2017 every major piece of the transformer existed. Looking back, the Vaswani paper feels less like an invention and more like a careful re-arrangement of parts that had been lying on the workbench for several years.</p>
+
+    <div class="diagram-grid cols-3">
+        <div class="diagram-panel accent-border">
+            <h4>Inputs</h4>
+            <ul>
+                <li>Bengio NPLM 2003 &mdash; learned word embeddings.</li>
+                <li>word2vec / GloVe 2013&ndash;14 &mdash; high-quality embeddings at scale.</li>
+                <li>Positional encodings (sinusoidal or learned) &mdash; not new in 2017.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>Sequence model</h4>
+            <ul>
+                <li>seq2seq 2014 (Sutskever, Cho).</li>
+                <li>Bahdanau attention 2014.</li>
+                <li>Self-attention &mdash; Cheng, Dong, Lapata 2016 (intra-sentence attention); Lin et al 2017 (structured self-attention).</li>
+                <li>Multi-head &mdash; the small invention of the 2017 paper.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel g">
+            <h4>Training</h4>
+            <ul>
+                <li>Adam optimiser &mdash; Kingma &amp; Ba 2014.</li>
+                <li>Layer normalisation &mdash; Ba, Kiros, Hinton 2016.</li>
+                <li>Dropout &mdash; Srivastava et al 2014.</li>
+                <li>Residual connections &mdash; He et al 2015 (ResNet).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="callout">
+        <div class="callout-label">Why nobody had done it yet</div>
+        <p>Two reasons. <strong>One:</strong> the Bahdanau-style attention was always layered on top of a recurrent backbone &mdash; it was an addition, not a replacement. The instinct to <em>remove</em> the RNN was unusual. <strong>Two:</strong> the parallel-friendliness of attention only matters if you have GPU/TPU clusters big enough to take advantage of it. The transformer paper was, in a sense, waiting for the 2016&ndash;17 generation of TPU pods at Google Brain to make its training run feasible. Deck 03 picks the story up there.</p>
+    </div>
+</section>
+
+<section class="slide" id="slide-12">
+    <div class="slide-number">12</div>
+    <h2>Cheat Sheet</h2>
+
+    <div class="diagram-grid cols-2">
+        <div class="diagram-panel accent-border">
+            <h4>The five hinges</h4>
+            <ul>
+                <li><strong>1948</strong> Shannon &mdash; n-grams, entropy, perplexity.</li>
+                <li><strong>1993</strong> IBM Models &mdash; latent alignment, noisy channel.</li>
+                <li><strong>2003</strong> Bengio NPLM &mdash; embeddings + neural net.</li>
+                <li><strong>2013</strong> word2vec &mdash; semantic geometry of embeddings.</li>
+                <li><strong>2014</strong> Bahdanau attention &mdash; the seed crystal of the transformer.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel y">
+            <h4>The five people</h4>
+            <ul>
+                <li>Shannon &mdash; the framing.</li>
+                <li>Jelinek &mdash; the statistical-NLP school.</li>
+                <li>Hinton &mdash; the neural sleeper, students everywhere.</li>
+                <li>Bengio &mdash; the hinge papers.</li>
+                <li>Manning &mdash; the leading academic NLP group.</li>
+            </ul>
+        </div>
+        <div class="diagram-panel g">
+            <h4>The two arguments</h4>
+            <ul>
+                <li>Symbolic vs statistical (Chomsky vs Jelinek).</li>
+                <li>Recurrent vs everything-else (which attention 2014 began to settle).</li>
+            </ul>
+        </div>
+        <div class="diagram-panel r">
+            <h4>What's next in the series</h4>
+            <ul>
+                <li>03 &mdash; The 2017 transformer paper itself, the eight authors, what BERT and GPT did with it.</li>
+                <li>04 &mdash; The university labs where most of these ideas were born.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <p>Part of the <a href="https://github.com/BrendanJamesLynskey/LLM_Hub_LLM_History">LLM History series</a> in the <a href="https://github.com/BrendanJamesLynskey/LLMs">LLMs hub</a>.</p>
+    <p style="margin-top: 0.5rem;"><a href="https://brendanjameslynskey.github.io/LLM_History_01_Introduction/">&larr; 01 Introduction</a> &middot; <a href="https://brendanjameslynskey.github.io/LLM_History_03_The_Transformer/">03 The Transformer Paper &rarr;</a></p>
+</footer>
+
+</body>
+</html>
