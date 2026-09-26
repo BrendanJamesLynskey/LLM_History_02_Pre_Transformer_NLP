@@ -162,11 +162,11 @@
     <h2>Shannon &mdash; Information Theory and Language (1948)</h2>
     <p>The story starts in 1948 at Bell Labs with <strong>Claude Shannon's <em>A Mathematical Theory of Communication</em></strong>. It is famously a paper about communication channels, but tucked inside it is what is plausibly the first <em>language model</em>: a chain of n-gram experiments using printed English.</p>
 
-    <p>Shannon counted letter pairs and triples in <em>"Jefferson the Virginian"</em> and similar sources, then sampled from those distributions to generate gibberish that nonetheless began to look like English the more context he conditioned on. He drew an unmistakable conclusion:</p>
+    <p>Shannon built letter- and word-level approximations to English &mdash; sampling by opening a book at random &mdash; then used those distributions to generate gibberish that nonetheless began to look like English the more context he conditioned on. He drew an unmistakable conclusion:</p>
 
     <div class="quote">
-        It appears, then, that a sufficiently complex stochastic process will give a satisfactory representation of a discrete information source.
-        <span class="attr">&mdash; Claude Shannon, <em>A Mathematical Theory of Communication</em>, 1948 &sect; 4</span>
+        It appears then that a sufficiently complex stochastic process will give a satisfactory representation of a discrete source.
+        <span class="attr">&mdash; Claude Shannon, <em>A Mathematical Theory of Communication</em>, 1948 &sect; 3</span>
     </div>
 
     <p>That sentence is the founding charter of statistical NLP. Its second half &mdash; <em>a sufficiently complex stochastic process will give a satisfactory representation</em> &mdash; is, almost word for word, the bet that ChatGPT is built on.</p>
@@ -191,7 +191,7 @@
 <section class="slide" id="slide-02">
     <div class="slide-number">02</div>
     <h2>The Symbolic Side &mdash; Chomsky's Programme</h2>
-    <p>Nine years after Shannon, <strong>Noam Chomsky's <em>Syntactic Structures</em> (1957)</strong> proposed the opposite framing: language is not a probabilistic process, it is a system of formal rules. The book reviewed Skinner's behaviourism for <em>Language</em> and demolished it, in the process founding modern generative linguistics.</p>
+    <p>Nine years after Shannon, <strong>Noam Chomsky's <em>Syntactic Structures</em> (1957)</strong> proposed the opposite framing: language is not a probabilistic process, it is a system of formal rules. The book founded modern generative linguistics; two years later Chomsky's review of Skinner's <em>Verbal Behavior</em> in <em>Language</em> (1959) demolished behaviourism.</p>
 
     <div class="quote">
         Colorless green ideas sleep furiously.
@@ -291,7 +291,6 @@
         <div class="diagram-panel g">
             <h4>The students who matter</h4>
             <ul>
-                <li><strong>Yoshua Bengio</strong> &mdash; Hinton's postdoc, then Mila.</li>
                 <li><strong>Ilya Sutskever</strong> &mdash; Hinton PhD, AlexNet co-author.</li>
                 <li><strong>Ruslan Salakhutdinov</strong> &mdash; Hinton PhD, CMU.</li>
                 <li><strong>Alex Krizhevsky</strong> &mdash; Hinton PhD, AlexNet first author.</li>
@@ -301,10 +300,6 @@
         </div>
     </div>
 
-    <div class="quote">
-        I needed to keep students stupid enough to work on it.
-        <span class="attr">&mdash; Geoffrey Hinton, paraphrasing himself in multiple interviews on why neural-net research persisted through its unfashionable decades.</span>
-    </div>
 
     <p>The Hinton-trained students are about as concentrated a contributor pool as the field has. Almost every senior IC at Brain, DeepMind, OpenAI, and Anthropic in 2026 either trained under Hinton, trained under one of his students, or works alongside someone who did.</p>
 </section>
@@ -334,7 +329,7 @@
         <div>
             <h4>Yoshua Bengio</h4>
             <div class="role">Universit&eacute; de Montr&eacute;al, MILA founder</div>
-            <p>French-born, Canadian. Did his PhD at McGill, postdoc with Hinton in Toronto, then Bell Labs with LeCun, then settled in Montreal in 1993 and stayed. Built MILA into the largest deep-learning academic group in the world. His students &mdash; Goodfellow, Bahdanau, Cho (postdoc), Mensch &mdash; appear repeatedly in the rest of this deck and the rest of this series. Quietly intense, ferociously prolific. Now devotes most of his time to AI safety, and <a href="https://yoshuabengio.org">writes publicly about catastrophic risk</a>.</p>
+            <p>French-born, Canadian. Did his PhD at McGill, postdoc with Michael Jordan at MIT, then Bell Labs with LeCun, then settled in Montreal in 1993 and stayed. Built MILA into the largest deep-learning academic group in the world. His students &mdash; Goodfellow, Bahdanau, Cho (postdoc) &mdash; appear repeatedly in the rest of this deck and the rest of this series. Quietly intense, ferociously prolific. Now devotes most of his time to AI safety, and <a href="https://yoshuabengio.org">writes publicly about catastrophic risk</a>.</p>
         </div>
     </div>
 </section>
@@ -378,7 +373,7 @@
         <div>
             <h4>Tomas Mikolov</h4>
             <div class="role">Brno University &rarr; Microsoft Research &rarr; Google Brain &rarr; Facebook AI &rarr; CIIRC</div>
-            <p>Czech, did his PhD on RNN-LMs in Brno in the late 2000s &mdash; pre-GPU, on small CPU clusters. Joined Google Brain in 2012 and shipped word2vec in 2013. Reportedly intense and quiet, with a strong scepticism of hype. Now back in Prague at the Czech Institute of Informatics, Robotics and Cybernetics. Word2vec was his first first-author paper out of Brno.</p>
+            <p>Czech, did his PhD on RNN-LMs in Brno in the late 2000s &mdash; pre-GPU, on small CPU clusters. Joined Google Brain in 2012 and shipped word2vec in 2013. Reportedly intense and quiet, with a strong scepticism of hype. Now back in Prague at the Czech Institute of Informatics, Robotics and Cybernetics.</p>
         </div>
     </div>
 </section>
@@ -489,7 +484,7 @@
         <div class="person-photo">YL</div>
         <div>
             <h4>Yann LeCun</h4>
-            <div class="role">Bell Labs &rarr; NYU &rarr; Meta AI Chief Scientist</div>
+            <div class="role">Bell Labs &rarr; NYU &rarr; Meta AI Chief Scientist &rarr; AMI Labs (2025)</div>
             <p>CNNs (1989), MNIST, the FAIR / Meta open-weight stance. Public sceptic of the LLM-as-AGI roadmap; advocates JEPA / world models. Loud, opinionated, scientifically generous.</p>
         </div>
     </div>
@@ -498,7 +493,7 @@
         <div>
             <h4>J&uuml;rgen Schmidhuber</h4>
             <div class="role">IDSIA Lugano (Switzerland)</div>
-            <p>LSTM (1997, with Hochreiter), neural Turing machines, generative models. Famously argues that he and his students (Sepp Hochreiter, Felix Gers, Alex Graves) anticipated most of modern deep learning. The argument is partially correct and entirely characteristic.</p>
+            <p>LSTM (1997, with Hochreiter), generative models. Famously argues that he and his students (Sepp Hochreiter, Felix Gers, Alex Graves) anticipated most of modern deep learning. The argument is partially correct and entirely characteristic.</p>
         </div>
     </div>
     <div class="person-card">
@@ -506,7 +501,7 @@
         <div>
             <h4>Christopher Manning</h4>
             <div class="role">Stanford NLP, Stanford HAI</div>
-            <p>Australian. Ran Stanford NLP through its modern dominant period. GloVe, dependency parsing, the Stanford CoreNLP toolkit, generations of students &mdash; Socher, Pennington, Karpathy, Liang. Calm, methodical, deeply influential.</p>
+            <p>Australian. Ran Stanford NLP through its modern dominant period. GloVe, dependency parsing, the Stanford CoreNLP toolkit, generations of students and postdocs &mdash; Socher, Pennington (postdoc). Calm, methodical, deeply influential.</p>
         </div>
     </div>
 </section>
@@ -547,7 +542,7 @@
 
     <div class="callout">
         <div class="callout-label">Why nobody had done it yet</div>
-        <p>Two reasons. <strong>One:</strong> the Bahdanau-style attention was always layered on top of a recurrent backbone &mdash; it was an addition, not a replacement. The instinct to <em>remove</em> the RNN was unusual. <strong>Two:</strong> the parallel-friendliness of attention only matters if you have GPU/TPU clusters big enough to take advantage of it. The transformer paper was, in a sense, waiting for the 2016&ndash;17 generation of TPU pods at Google Brain to make its training run feasible. Deck 03 picks the story up there.</p>
+        <p>Two reasons. <strong>One:</strong> the Bahdanau-style attention was always layered on top of a recurrent backbone &mdash; it was an addition, not a replacement. The instinct to <em>remove</em> the RNN was unusual. <strong>Two:</strong> the parallel-friendliness of attention only matters if you have GPU/TPU clusters big enough to take advantage of it. (The transformer paper's own models trained on a single machine with 8 NVIDIA P100 GPUs; the payoff from its parallelism grew as its descendants scaled onto larger clusters.) Deck 03 picks the story up there.</p>
     </div>
 </section>
 
